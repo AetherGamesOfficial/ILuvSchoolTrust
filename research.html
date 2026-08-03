@@ -14,7 +14,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #121212;
+            background: #121212 url("aether background.png") center / cover fixed no-repeat;
             font-family: "Courier New", Courier, monospace;
             display: flex;
             flex-direction: column;
@@ -22,15 +22,19 @@
 
         .tab-bar {
             display: flex;
-            background-color: #1a1a1a;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             padding: 10px 10px 0 10px;
-            border-bottom: 4px solid #ffffff;
+            border-bottom: none;
             gap: 5px;
             z-index: 50;
         }
 
         .tab {
-            background-color: #000000;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             color: #ffffff;
             border: 4px solid #ffffff;
             border-bottom: none;
@@ -43,13 +47,13 @@
             gap: 10px;
             font-size: 14px;
             font-weight: bold;
-            margin-bottom: -4px;
+            margin-bottom: 0;
             position: relative;
             z-index: 2;
         }
 
         .tab.active {
-            background-color: #121212;
+            background: rgba(255, 255, 255, 0.09);
         }
 
         .close-tab {
@@ -62,7 +66,9 @@
         }
 
         .new-tab-btn {
-            background-color: #000000;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             color: #ffffff;
             border: 4px solid #ffffff;
             border-bottom: none;
@@ -72,7 +78,7 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
-            margin-bottom: -4px;
+            margin-bottom: 0;
         }
 
         .appleseed {
@@ -406,7 +412,9 @@
 
         #uv-address {
             width: 100%;
-            background-color: black;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 4px solid white;
             border-radius: 30px;
             padding: 18px 25px;
@@ -473,6 +481,68 @@
                 opacity: 0;
             }
         }
+    
+        button {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }    
+        .appleseed,
+        .nav-action,
+        .homebutton {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .nav-action,
+        .homebutton {
+            border-radius: 12px;
+        }
+
+        .controller-svg,
+        .home-icon,
+        .apps-icon {
+            background: transparent !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .appleseed .nav-action,
+        .appleseed .homebutton,
+        .appleseed .controller-svg,
+        .appleseed .home-icon,
+        .appleseed .apps-icon {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+        }
+        .settings-svg {
+            width: 42px;
+            height: 42px;
+            display: block;
+        }
+        .appleseed {
+            background: rgba(0, 0, 0, 0.35) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .Medeviscool,
+        .VenomOnTop,
+        .deveriono {
+            background: rgba(0, 0, 0, 0.35) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .Medeviscool:hover,
+        .VenomOnTop:hover,
+        .deveriono:hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+        }
+
     </style>
 </head>
 
@@ -482,7 +552,6 @@
     <div class="tab-bar" id="tab-bar">
         <button class="new-tab-btn" id="new-tab-btn">+</button>
     </div>
-
     <nav class="appleseed" id="home-nav">
         <button class="nav-action" onclick="window.location.href='enrichment.html'" title="Games" aria-label="Games">
             <svg class="controller-svg" aria-hidden="true" viewBox="0 0 96 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -494,10 +563,7 @@
                 <path d="M44 27H49M57 27H62" stroke="white" stroke-width="5" stroke-linecap="round"/>
             </svg>
         </button>
-        <button
-            class="homebutton"
-            onclick="window.location.href='studyhub.html'"
-        >
+        <button class="homebutton" onclick="window.location.href='studyhub.html'" title="Home" aria-label="Home">
             <span class="home-icon" aria-hidden="true"><span class="home-chimney"></span></span>
         </button>
         <button class="nav-action" onclick="window.location.href='resources.html'" title="Apps" aria-label="Apps">
@@ -507,6 +573,12 @@
                 <span class="apps-square three"></span>
                 <span class="apps-plus"></span>
             </span>
+        </button>
+        <button class="nav-action settings-action" onclick="window.location.href='settings.html'" type="button" title="Settings" aria-label="Settings">
+            <svg class="settings-svg" aria-hidden="true" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M29 4H35L37 11.5C39.2 12.1 41.2 13 43 14.1L49.7 10.2L53.8 14.3L49.9 21C51 22.8 51.9 24.8 52.5 27L60 29V35L52.5 37C51.9 39.2 51 41.2 49.9 43L53.8 49.7L49.7 53.8L43 49.9C41.2 51 39.2 51.9 37 52.5L35 60H29L27 52.5C24.8 51.9 22.8 51 21 49.9L14.3 53.8L10.2 49.7L14.1 43C13 41.2 12.1 39.2 11.5 37L4 35V29L11.5 27C12.1 24.8 13 22.8 14.1 21L10.2 14.3L14.3 10.2L21 14.1C22.8 13 24.8 12.1 27 11.5L29 4Z" fill="white"/>
+                <circle cx="32" cy="32" r="9" fill="#121212" opacity="0.8"/>
+            </svg>
         </button>
     </nav>
 
@@ -585,13 +657,11 @@
     </div>
 
  
+<script src="/bootstrap-init.js"></script>
 <script type="module">
-import * as sandstone from "https://cdn.jsdelivr.net/npm/sandstone-proxy@0.2.0/dist/sandstone.mjs";
-
 function initAetherResearch() {
 
     const toolTargetKey = "aether-tool-target";
-    const staticWispUrl = "wss://wisp.mercurywork.shop/";
     const form = document.getElementById("uv-form");
     const address = document.getElementById("uv-address");
     const landingUi = document.getElementById("landing-ui");
@@ -601,9 +671,11 @@ function initAetherResearch() {
     const newTabBtn = document.getElementById("new-tab-btn");
     const viewportsContainer = document.getElementById("viewports-container");
     const homeNav = document.getElementById("home-nav");
-
     let tabs = [];
     let activeTabId = null;
+    let legacyWorkersChecked = false;
+    let scramjetReadyPromise = null;
+    let scramjetController = null;
     let loadToken = 0;
 
     /* =========================
@@ -619,7 +691,7 @@ function initAetherResearch() {
             return "https://" + url;
         }
 
-        return "https://www.google.com/search?q=" +
+        return "https://duckduckgo.com/?q=" +
             encodeURIComponent(url);
     }
 
@@ -688,9 +760,7 @@ function initAetherResearch() {
             <button class="close-tab">&times;</button>
         `;
 
-        sandstone.libcurl.set_websocket(staticWispUrl);
-        const proxyFrame = new sandstone.controller.ProxyFrame();
-        const iframeEl = proxyFrame.iframe;
+        const iframeEl = document.createElement("iframe");
         iframeEl.className = "web-viewport";
         iframeEl.style.display = "none";
         iframeEl.setAttribute("allow", "autoplay; fullscreen; gamepad; microphone; camera; clipboard-read; clipboard-write");
@@ -701,8 +771,8 @@ function initAetherResearch() {
         const tab = {
             id,
             tabEl,
-            proxyFrame,
             iframeEl,
+            frame: null,
             hasLoadedUrl: false,
             currentUrl: "",
             rawInput: ""
@@ -745,7 +815,7 @@ function initAetherResearch() {
     createTab();
 
     /* =========================
-        STATIC RESEARCH LOADER
+        AETHER RESEARCH SETUP
     ========================= */
     async function wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -758,6 +828,125 @@ function initAetherResearch() {
         });
 
         return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+    }
+
+    async function removeLegacyServiceWorkers() {
+        if (legacyWorkersChecked) return;
+        legacyWorkersChecked = true;
+        if (!navigator.serviceWorker?.getRegistrations) return;
+
+        const cleanupKey = "aether-research-sw-cleaned-v1";
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        let removedLegacyWorker = false;
+
+        for (const registration of registrations) {
+            const worker =
+                registration.active ||
+                registration.waiting ||
+                registration.installing;
+            const scriptUrl = worker?.scriptURL || "";
+
+            if (
+                scriptUrl &&
+                (
+                    scriptUrl.includes("/uv") ||
+                    scriptUrl.includes("/dynamic/") ||
+                    scriptUrl.includes("/baremux/") ||
+                    scriptUrl.includes("/register-sw.js")
+                )
+            ) {
+                removedLegacyWorker = await registration.unregister() || removedLegacyWorker;
+            }
+        }
+
+        if (removedLegacyWorker && !sessionStorage.getItem(cleanupKey)) {
+            sessionStorage.setItem(cleanupKey, "true");
+            await Promise.all([
+                caches.delete("__dynamic$files"),
+                caches.delete("__dynamic$blob"),
+                caches.delete("__dynamic"),
+                caches.delete("uv"),
+                caches.delete("uv-cache")
+            ]);
+            window.location.reload();
+            throw new Error("Reloading research engine.");
+        }
+    }
+
+    async function loadBootstrapInit() {
+        if (typeof window.initBootstrap === "function") return;
+
+        await withTimeout(new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "/bootstrap-init.js";
+            script.onload = resolve;
+            script.onerror = () => reject(new Error("Research engine script failed to load."));
+            document.head.appendChild(script);
+        }), 7000, "Research engine script took too long to load.");
+    }
+
+    async function loadBootstrapController() {
+        if (typeof window.initBootstrap === "function") {
+            return window.initBootstrap();
+        }
+
+        const response = await withTimeout(
+            fetch("/bootstrap-init.js", { cache: "no-store" }),
+            7000,
+            "Research engine script took too long to fetch."
+        );
+        if (!response.ok) {
+            throw new Error("Research engine script failed to fetch.");
+        }
+
+        const source = await response.text();
+        const importUrl = source.match(/import\("([^"]+)"\)/)?.[1];
+        const configText = source.match(/return init\(([\s\S]*?)\);\s*\}/)?.[1];
+        if (!importUrl || !configText) {
+            throw new Error("Research engine script could not be parsed.");
+        }
+
+        const { init } = await import(importUrl);
+        return init(JSON.parse(configText));
+    }
+
+    async function prepareScramjet() {
+        if (scramjetReadyPromise) return scramjetReadyPromise;
+
+        scramjetReadyPromise = prepareScramjetOnce().catch((err) => {
+            scramjetReadyPromise = null;
+            throw err;
+        });
+
+        return scramjetReadyPromise;
+    }
+
+    async function prepareScramjetOnce() {
+        await withTimeout(
+            removeLegacyServiceWorkers(),
+            2500,
+            "Old research workers took too long to clear."
+        );
+
+        if (!navigator.serviceWorker?.register || !window.SharedWorker) {
+            throw new Error("Research service workers are not supported in this browser.");
+        }
+
+        await loadBootstrapInit();
+
+        const controller = await withTimeout(
+            loadBootstrapController(),
+            15000,
+            "Research engine took too long to start."
+        );
+        await withTimeout(
+            controller.wait(),
+            15000,
+            "Research engine did not become ready."
+        );
+
+        scramjetController = controller;
+        return controller;
     }
 
     function setLoadingError(token, message) {
@@ -781,23 +970,28 @@ function initAetherResearch() {
             assertValidUrl(url);
 
             errorEl.textContent = "Loading...";
-
-            loadTimer = setTimeout(() => {
-                setLoadingError(token, "Still loading. This site may be taking too long.");
-            }, 15000);
-
-            await withTimeout(
-                tab.proxyFrame.navigate_to(url),
-                30000,
-                "Research page took too long to load."
-            );
-
-            if (token !== loadToken) return;
-            clearTimeout(loadTimer);
-            if (errorEl.textContent === "Loading...") {
-                errorEl.textContent = "";
+            const controller = await prepareScramjet();
+            if (!tab.frame) {
+                tab.frame = controller.createFrame(tab.iframeEl);
             }
 
+            tab.iframeEl.onload = () => {
+                if (token !== loadToken) return;
+                clearTimeout(loadTimer);
+                if (errorEl.textContent === "Loading...") {
+                    errorEl.textContent = "";
+                }
+            };
+            tab.iframeEl.onerror = () => {
+                clearTimeout(loadTimer);
+                setLoadingError(token, "Site blocked or failed to load.");
+            };
+
+            loadTimer = setTimeout(() => {
+                setLoadingError(token, "Still loading. This site may be blocking the proxy or taking too long.");
+            }, 15000);
+
+            tab.frame.go(url);
             tab.hasLoadedUrl = true;
             tab.currentUrl = url;
             tab.rawInput = input;
@@ -813,6 +1007,8 @@ function initAetherResearch() {
 
         } catch (err) {
             clearTimeout(loadTimer);
+            scramjetReadyPromise = null;
+            scramjetController = null;
             tab.hasLoadedUrl = false;
             render();
             errorEl.textContent = "Error: " + err.message;
@@ -820,6 +1016,12 @@ function initAetherResearch() {
     }
 
     form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await loadAddress();
+    });
+
+    address.addEventListener("keydown", async (e) => {
+        if (e.key !== "Enter") return;
         e.preventDefault();
         await loadAddress();
     });
@@ -841,6 +1043,36 @@ if (document.readyState === "loading") {
     initAetherResearch();
 }
 </script>
-
+<script>
+(() => {
+    const store = window.localStorage;
+    const bgMap = {
+        default: '#121212 url("aether background.png") center / cover fixed no-repeat',
+        night: 'linear-gradient(135deg, #050505, #122033 58%, #12051f) fixed',
+        ocean: 'linear-gradient(135deg, #001219, #005f73, #0a9396) fixed',
+        none: '#121212'
+    };
+    const custom = (store.getItem('aether.settings.customBg') || '').trim();
+    const mode = store.getItem('aether.settings.bg') || 'default';
+    const bg = custom ? `#121212 url("${custom.replace(/"/g, '%22')}") center / cover fixed no-repeat` : (bgMap[mode] || bgMap.default);
+    document.documentElement.style.background = bg;
+    document.body.style.background = bg;
+    document.querySelectorAll('.settings-action').forEach(button => {
+        button.addEventListener('click', () => { window.location.href = 'settings.html'; });
+    });
+})();
+</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
