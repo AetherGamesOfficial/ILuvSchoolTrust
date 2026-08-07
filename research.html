@@ -941,7 +941,21 @@ function initAetherResearch() {
         await loadAddress();
     });
 
-    const params = new URL(window.location.href).searchParams;
+    function getLaunchParams() {
+        const params = new URL(window.location.href).searchParams;
+        try {
+            const forwarded = decodeURIComponent(window.location.hash.slice(1) || "");
+            if (forwarded.startsWith("?")) {
+                const forwardedParams = new URLSearchParams(forwarded.slice(1));
+                for (const [key, value] of forwardedParams) {
+                    if (!params.has(key)) params.set(key, value);
+                }
+            }
+        } catch {}
+        return params;
+    }
+
+    const params = getLaunchParams();
     let storedGoto = "";
     try { storedGoto = sessionStorage.getItem(toolTargetKey) || ""; } catch { storedGoto = ""; }
     const goto = params.get("goto") || storedGoto;
