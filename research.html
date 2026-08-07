@@ -657,11 +657,33 @@
     </div>
 
  
-<script src="/bootstrap-init.js"></script>
+
 <script type="module">
 function initAetherResearch() {
 
     const toolTargetKey = "aether-tool-target";
+    const arcticBases = [
+        "https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main",
+        "https://testingcf.jsdelivr.net/gh/sealiee11/arctic-static@main",
+        "https://gcore.jsdelivr.net/gh/sealiee11/arctic-static@main",
+        "https://fastly.jsdelivr.net/gh/sealiee11/arctic-static@main",
+        "https://originfastly.jsdelivr.net/gh/sealiee11/arctic-static@main",
+        "https://quantil.jsdelivr.net/gh/sealiee11/arctic-static@main",
+        "https://esm.sh/gh/sealiee11/arctic-static@main"
+    ];
+
+    function encodeArcticTarget(value) {
+        const bytes = new TextEncoder().encode(value);
+        let text = "";
+        for (const byte of bytes) text += String.fromCharCode(byte);
+        return "aw1." + btoa(text).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function getArcticUrl(target, baseIndex = 0) {
+        const base = arcticBases[baseIndex % arcticBases.length].replace(/\/+$/, "");
+        return base + "/embed.svg?backend=scramjet2&palette=gnmath#" + encodeArcticTarget(target);
+    }
+
     const form = document.getElementById("uv-form");
     const address = document.getElementById("uv-address");
     const landingUi = document.getElementById("landing-ui");
@@ -673,14 +695,8 @@ function initAetherResearch() {
     const homeNav = document.getElementById("home-nav");
     let tabs = [];
     let activeTabId = null;
-    let legacyWorkersChecked = false;
-    let scramjetReadyPromise = null;
-    let scramjetController = null;
     let loadToken = 0;
 
-    /* =========================
-        FORMAT URL
-    ========================= */
     function formatUrl(input) {
         let url = input.trim();
         if (!url) return "";
@@ -691,8 +707,7 @@ function initAetherResearch() {
             return "https://" + url;
         }
 
-        return "https://duckduckgo.com/?q=" +
-            encodeURIComponent(url);
+        return "https://duckduckgo.com/?q=" + encodeURIComponent(url);
     }
 
     function assertValidUrl(url) {
@@ -706,9 +721,6 @@ function initAetherResearch() {
         }
     }
 
-    /* =========================
-        TAB HELPERS
-    ========================= */
     function getActiveTab() {
         return tabs.find(t => t.id === activeTabId);
     }
@@ -746,9 +758,6 @@ function initAetherResearch() {
         }
     }
 
-    /* =========================
-        CREATE TAB
-    ========================= */
     function createTab() {
         const id = Date.now().toString();
 
@@ -772,7 +781,6 @@ function initAetherResearch() {
             id,
             tabEl,
             iframeEl,
-            frame: null,
             hasLoadedUrl: false,
             currentUrl: "",
             rawInput: ""
@@ -792,9 +800,6 @@ function initAetherResearch() {
         setActive(id);
     }
 
-    /* =========================
-        CLOSE TAB
-    ========================= */
     function closeTab(id) {
         const index = tabs.findIndex(t => t.id === id);
         if (index === -1) return;
@@ -814,184 +819,97 @@ function initAetherResearch() {
     newTabBtn.addEventListener("click", createTab);
     createTab();
 
-    /* =========================
-        AETHER RESEARCH SETUP
-    ========================= */
-    async function wait(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async function withTimeout(promise, ms, message) {
-        let timeoutId;
-        const timeout = new Promise((_, reject) => {
-            timeoutId = setTimeout(() => reject(new Error(message)), ms);
-        });
-
-        return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
-    }
-
-    async function removeLegacyServiceWorkers() {
-        if (legacyWorkersChecked) return;
-        legacyWorkersChecked = true;
-        if (!navigator.serviceWorker?.getRegistrations) return;
-
-        const cleanupKey = "aether-research-sw-cleaned-v1";
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        let removedLegacyWorker = false;
-
-        for (const registration of registrations) {
-            const worker =
-                registration.active ||
-                registration.waiting ||
-                registration.installing;
-            const scriptUrl = worker?.scriptURL || "";
-
-            if (
-                scriptUrl &&
-                (
-                    scriptUrl.includes("/uv") ||
-                    scriptUrl.includes("/dynamic/") ||
-                    scriptUrl.includes("/baremux/") ||
-                    scriptUrl.includes("/register-sw.js")
-                )
-            ) {
-                removedLegacyWorker = await registration.unregister() || removedLegacyWorker;
-            }
-        }
-
-        if (removedLegacyWorker && !sessionStorage.getItem(cleanupKey)) {
-            sessionStorage.setItem(cleanupKey, "true");
-            await Promise.all([
-                caches.delete("__dynamic$files"),
-                caches.delete("__dynamic$blob"),
-                caches.delete("__dynamic"),
-                caches.delete("uv"),
-                caches.delete("uv-cache")
-            ]);
-            window.location.reload();
-            throw new Error("Reloading research engine.");
-        }
-    }
-
-    async function loadBootstrapInit() {
-        if (typeof window.initBootstrap === "function") return;
-
-        await withTimeout(new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = "/bootstrap-init.js";
-            script.onload = resolve;
-            script.onerror = () => reject(new Error("Research engine script failed to load."));
-            document.head.appendChild(script);
-        }), 7000, "Research engine script took too long to load.");
-    }
-
-    async function loadBootstrapController() {
-        if (typeof window.initBootstrap === "function") {
-            return window.initBootstrap();
-        }
-
-        const response = await withTimeout(
-            fetch("/bootstrap-init.js", { cache: "no-store" }),
-            7000,
-            "Research engine script took too long to fetch."
-        );
-        if (!response.ok) {
-            throw new Error("Research engine script failed to fetch.");
-        }
-
-        const source = await response.text();
-        const importUrl = source.match(/import\("([^"]+)"\)/)?.[1];
-        const configText = source.match(/return init\(([\s\S]*?)\);\s*\}/)?.[1];
-        if (!importUrl || !configText) {
-            throw new Error("Research engine script could not be parsed.");
-        }
-
-        const { init } = await import(importUrl);
-        return init(JSON.parse(configText));
-    }
-
-    async function prepareScramjet() {
-        if (scramjetReadyPromise) return scramjetReadyPromise;
-
-        scramjetReadyPromise = prepareScramjetOnce().catch((err) => {
-            scramjetReadyPromise = null;
-            throw err;
-        });
-
-        return scramjetReadyPromise;
-    }
-
-    async function prepareScramjetOnce() {
-        await withTimeout(
-            removeLegacyServiceWorkers(),
-            2500,
-            "Old research workers took too long to clear."
-        );
-
-        if (!navigator.serviceWorker?.register || !window.SharedWorker) {
-            throw new Error("Research service workers are not supported in this browser.");
-        }
-
-        await loadBootstrapInit();
-
-        const controller = await withTimeout(
-            loadBootstrapController(),
-            15000,
-            "Research engine took too long to start."
-        );
-        await withTimeout(
-            controller.wait(),
-            15000,
-            "Research engine did not become ready."
-        );
-
-        scramjetController = controller;
-        return controller;
-    }
-
     function setLoadingError(token, message) {
         if (token !== loadToken) return;
         errorEl.textContent = message;
     }
 
-    async function loadAddress() {
-
+    async function loadAddress(rawValue) {
         const tab = getActiveTab();
         if (!tab) return;
 
-        const input = address.value.trim();
+        const input = String(rawValue ?? address.value ?? "").trim();
         if (!input) return;
 
         const url = formatUrl(input);
         const token = ++loadToken;
-        let loadTimer = null;
+        let baseIndex = 0;
+        let softTimer = null;
+        let hardTimer = null;
+
+        function clearTimers() {
+            clearTimeout(softTimer);
+            clearTimeout(hardTimer);
+        }
+
+        function loadArcticFrame() {
+            tab.iframeEl.src = getArcticUrl(url, baseIndex);
+        }
+
+        function tryNextRoute(message) {
+            if (token !== loadToken) return false;
+            if (baseIndex >= arcticBases.length - 1) return false;
+            baseIndex += 1;
+            errorEl.textContent = message || "Trying another route...";
+            loadArcticFrame();
+            return true;
+        }
+
+        function onArcticMessage(event) {
+            const data = event.data;
+            if (!data || data.type !== "arctic-embed") return;
+
+            if (data.status === "ready") {
+                clearTimers();
+                if (token === loadToken) errorEl.textContent = "";
+                window.removeEventListener("message", onArcticMessage);
+                return;
+            }
+
+            if (data.status === "progress") {
+                if (token === loadToken && errorEl.textContent === "Loading...") {
+                    errorEl.textContent = "Loading...";
+                }
+                return;
+            }
+
+            if (data.status === "error") {
+                if (!tryNextRoute("Trying another route...")) {
+                    clearTimers();
+                    setLoadingError(token, "Could not load that page.");
+                    window.removeEventListener("message", onArcticMessage);
+                }
+            }
+        }
 
         try {
             assertValidUrl(url);
 
+            clearTimers();
             errorEl.textContent = "Loading...";
-            const controller = await prepareScramjet();
-            if (!tab.frame) {
-                tab.frame = controller.createFrame(tab.iframeEl);
-            }
+            window.addEventListener("message", onArcticMessage);
 
-            tab.iframeEl.onload = () => {
-                if (token !== loadToken) return;
-                clearTimeout(loadTimer);
-                if (errorEl.textContent === "Loading...") {
-                    errorEl.textContent = "";
+            tab.iframeEl.onload = () => {};
+            tab.iframeEl.onerror = () => {
+                if (!tryNextRoute("Trying another route...")) {
+                    clearTimers();
+                    setLoadingError(token, "Site blocked or failed to load.");
+                    window.removeEventListener("message", onArcticMessage);
                 }
             };
-            tab.iframeEl.onerror = () => {
-                clearTimeout(loadTimer);
-                setLoadingError(token, "Site blocked or failed to load.");
-            };
 
-            loadTimer = setTimeout(() => {
+            softTimer = setTimeout(() => {
                 setLoadingError(token, "Still loading. This site may be blocking the proxy or taking too long.");
-            }, 15000);
+            }, 20000);
 
-            tab.frame.go(url);
+            hardTimer = setTimeout(() => {
+                if (!tryNextRoute("Trying another route...")) {
+                    setLoadingError(token, "Could not load that page.");
+                    window.removeEventListener("message", onArcticMessage);
+                }
+            }, 60000);
+
+            loadArcticFrame();
             tab.hasLoadedUrl = true;
             tab.currentUrl = url;
             tab.rawInput = input;
@@ -1000,15 +918,12 @@ function initAetherResearch() {
                 .replace(/^https?:\/\/(www\.)?/, "")
                 .split("/")[0];
 
-            tab.tabEl.querySelector(".tab-title").textContent =
-                domain.substring(0, 16);
-
+            tab.tabEl.querySelector(".tab-title").textContent = domain.substring(0, 16);
             render();
 
         } catch (err) {
-            clearTimeout(loadTimer);
-            scramjetReadyPromise = null;
-            scramjetController = null;
+            clearTimers();
+            window.removeEventListener("message", onArcticMessage);
             tab.hasLoadedUrl = false;
             render();
             errorEl.textContent = "Error: " + err.message;
@@ -1017,7 +932,7 @@ function initAetherResearch() {
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        await loadAddress();
+        await loadAddress(address.value);
     });
 
     address.addEventListener("keydown", async (e) => {
@@ -1027,12 +942,14 @@ function initAetherResearch() {
     });
 
     const params = new URL(window.location.href).searchParams;
-    const goto = params.get("goto") || sessionStorage.getItem(toolTargetKey);
+    let storedGoto = "";
+    try { storedGoto = sessionStorage.getItem(toolTargetKey) || ""; } catch { storedGoto = ""; }
+    const goto = params.get("goto") || storedGoto;
     if (goto) {
-        sessionStorage.removeItem(toolTargetKey);
+        try { sessionStorage.removeItem(toolTargetKey); } catch {}
         address.value = goto;
         window.history.replaceState(null, "", window.location.pathname);
-        loadAddress();
+        loadAddress(goto);
     }
 
 }
