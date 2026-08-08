@@ -34,8 +34,8 @@
     import { r as prepare, R as Runtime, W as WispResolver, d as decodeTarget } from "https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main/assets/resolver-C09Pc7JC.js";
 
     const params = new URLSearchParams(location.search);
-    const wisp = params.get("wisp") || "wss://wisp.mercurywork.shop/";
-    const backend = params.get("backend") || "scramjet2";
+    const wisp = window.__AETHER_STATIC_WISP || params.get("wisp") || "wss://wisp.mercurywork.shop/";
+    const backend = window.__AETHER_STATIC_BACKEND || params.get("backend") || "scramjet2";
     const frame = document.getElementById("frame");
     const stage = document.getElementById("stage");
     const statusEl = document.getElementById("status");
@@ -53,7 +53,7 @@
     function targetOf() {
       const injected = window.__ARCTIC_EMBED_TARGET;
       if (typeof injected === "string" && injected) return injected;
-      const hash = location.hash.slice(1);
+      const hash = window.__AETHER_STATIC_TARGET_HASH || location.hash.slice(1);
       if (hash) return decodeTarget(hash) || hash;
       return params.get("url") || "";
     }

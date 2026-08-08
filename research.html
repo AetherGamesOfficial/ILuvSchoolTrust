@@ -684,7 +684,7 @@ function initAetherResearch() {
         const params = new URLSearchParams({ backend: "scramjet2", palette: "gnmath" });
         const wisp = arcticWisps[routeIndex];
         if (wisp) params.set("wisp", wisp);
-        return getStaticAssetUrl("static-scramjet.html") + "?" + params.toString() + "#" + encodeArcticTarget(target);
+        return getStaticAssetUrl("static-scramjet.svg") + "?" + params.toString() + "#" + encodeArcticTarget(target);
     }
 
     const form = document.getElementById("uv-form");
