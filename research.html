@@ -662,15 +662,14 @@
 function initAetherResearch() {
 
     const toolTargetKey = "aether-tool-target";
-    const arcticBases = [
-        "https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main",
-        "https://testingcf.jsdelivr.net/gh/sealiee11/arctic-static@main",
-        "https://gcore.jsdelivr.net/gh/sealiee11/arctic-static@main",
-        "https://fastly.jsdelivr.net/gh/sealiee11/arctic-static@main",
-        "https://originfastly.jsdelivr.net/gh/sealiee11/arctic-static@main",
-        "https://quantil.jsdelivr.net/gh/sealiee11/arctic-static@main",
-        "https://esm.sh/gh/sealiee11/arctic-static@main"
+    const staticCdnBase = "https://cdn.jsdelivr.net/gh/AetherGamesOfficial/Aetherhtmlstatic@main/";
+    const arcticWisps = [
+        "wss://wisp.mercurywork.shop/"
     ];
+
+    function getStaticAssetUrl(file) {
+        return staticCdnBase + file;
+    }
 
     function encodeArcticTarget(value) {
         const bytes = new TextEncoder().encode(value);
@@ -680,8 +679,12 @@ function initAetherResearch() {
     }
 
     function getArcticUrl(target, baseIndex = 0) {
-        const base = arcticBases[baseIndex % arcticBases.length].replace(/\/+$/, "");
-        return base + "/embed.svg?backend=scramjet2&palette=gnmath#" + encodeArcticTarget(target);
+        const routeCount = arcticWisps.length;
+        const routeIndex = baseIndex % routeCount;
+        const params = new URLSearchParams({ backend: "scramjet2", palette: "gnmath" });
+        const wisp = arcticWisps[routeIndex];
+        if (wisp) params.set("wisp", wisp);
+        return getStaticAssetUrl("static-scramjet.html") + "?" + params.toString() + "#" + encodeArcticTarget(target);
     }
 
     const form = document.getElementById("uv-form");
@@ -848,7 +851,7 @@ function initAetherResearch() {
 
         function tryNextRoute(message) {
             if (token !== loadToken) return false;
-            if (baseIndex >= arcticBases.length - 1) return false;
+            if (baseIndex >= arcticWisps.length - 1) return false;
             baseIndex += 1;
             errorEl.textContent = message || "Trying another route...";
             loadArcticFrame();
