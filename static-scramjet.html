@@ -30,12 +30,36 @@
     </div>
   </div>
   <iframe id="frame" allow="autoplay; fullscreen; clipboard-read; clipboard-write; encrypted-media; picture-in-picture; gamepad"></iframe>
+  <script>
+    (() => {
+      const memory = new Map();
+      const safeStore = {
+        getItem: key => memory.has(String(key)) ? memory.get(String(key)) : null,
+        setItem: (key, value) => memory.set(String(key), String(value)),
+        removeItem: key => memory.delete(String(key)),
+        clear: () => memory.clear()
+      };
+      for (const name of ["localStorage", "sessionStorage"]) {
+        try { void window[name]; }
+        catch { try { Object.defineProperty(window, name, { value: safeStore, configurable: true }); } catch {} }
+      }
+    })();
+  </script>
   <script type="module">
     import { r as prepare, R as Runtime, d as decodeTarget } from "https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main/assets/resolver-C09Pc7JC.js";
 
     const params = new URLSearchParams(location.search);
-    const wisp = window.__AETHER_STATIC_WISP || params.get("wisp") || "wss://wisp.mercurywork.shop/";
+    const preferredWisp = normalizeWisp(window.__AETHER_STATIC_WISP || params.get("wisp") || "wss://wisp.mercurywork.shop/");
     const backend = window.__AETHER_STATIC_BACKEND || params.get("backend") || "scramjet2";
+    const relayListUrl = "https://cdn.jsdelivr.net/gh/skidding-code/arctic-wisps@main/wisp.txt";
+    const bundledWisps = [
+      "wss://wisp.mercurywork.shop/",
+      "wss://arctic.lat/wisp/",
+      "wss://math.luminalos.com/cdn-cgi/p/",
+      "wss://math.sealiee.click/cdn-cgi/p/",
+      "wss://math.mathematicaloffice.com/cdn-cgi/p/",
+      "wss://math.luminal.click/cdn-cgi/p/"
+    ].map(normalizeWisp).filter(Boolean);
     const frame = document.getElementById("frame");
     const stage = document.getElementById("stage");
     const statusEl = document.getElementById("status");
@@ -44,6 +68,8 @@
     const retry = document.getElementById("retry");
     let runId = 0;
     let runtime = null;
+    let relayPromise = null;
+    const rejectedRelays = new Set;
 
     function post(status, detail) {
       if (window.parent !== window) window.parent.postMessage({ type: "arctic-embed", status, detail }, "*");
@@ -62,12 +88,70 @@
       post("progress", text);
     }
 
+    function normalizeWisp(value) {
+      if (typeof value !== "string") return null;
+      try {
+        const url = new URL(value.trim());
+        if (url.protocol !== "wss:" && url.protocol !== "ws:") return null;
+        if (!url.pathname.endsWith("/")) url.pathname += "/";
+        url.search = "";
+        url.hash = "";
+        return url.toString();
+      } catch {
+        return null;
+      }
+    }
+
+    function decodeAw1List(text) {
+      const parts = text.trim().split(".");
+      if (parts.length !== 3 || parts[0] !== "aw1") return text;
+      const payload = parts[2].replace(/-/g, "+").replace(/_/g, "/");
+      const raw = Uint8Array.from(atob(payload + "=".repeat((4 - payload.length % 4) % 4)), char => char.charCodeAt(0));
+      const key = new TextEncoder().encode(`arctic-list-mask:${parts[1]}:1`);
+      const decoded = Uint8Array.from(raw, (byte, index) => byte ^ key[index % key.length]);
+      return new TextDecoder().decode(decoded);
+    }
+
+    function parseRelayList(text) {
+      const seen = new Set;
+      const relays = [];
+      for (const line of decodeAw1List(text).split(/\n+/)) {
+        const relay = normalizeWisp(line);
+        if (relay && !seen.has(relay)) {
+          seen.add(relay);
+          relays.push(relay);
+        }
+      }
+      return relays;
+    }
+
+    async function loadRelays() {
+      if (!relayPromise) {
+        relayPromise = fetch(relayListUrl, { cache: "no-store" })
+          .then(response => response.ok ? response.text() : "")
+          .then(text => parseRelayList(text))
+          .catch(() => [])
+          .then(relays => {
+            const merged = [preferredWisp, ...bundledWisps, ...relays].filter(Boolean);
+            return [...new Set(merged)];
+          });
+      }
+      return relayPromise;
+    }
+
+    async function nextRelay() {
+      const relays = await loadRelays();
+      const relay = relays.find(value => !rejectedRelays.has(value)) || relays[0];
+      if (!relay) throw new Error("no wisp endpoints available");
+      return relay;
+    }
+
     async function getRuntime() {
       if (runtime) return runtime;
       await prepare().catch(() => {});
-      runtime = new Runtime(async () => wisp, {
-        onWispFailure: () => {},
-        onWispSuccess: () => {}
+      runtime = new Runtime(nextRelay, {
+        onWispFailure: url => { if (url) rejectedRelays.add(normalizeWisp(url) || url); },
+        onWispSuccess: url => { if (url) rejectedRelays.delete(normalizeWisp(url) || url); }
       });
       return runtime;
     }
@@ -94,7 +178,7 @@
           isStale: () => token !== runId,
           onLocationChange: (url) => post("navigate", url),
           onStatus: (info) => {
-            if (info.phase === "resolving-wisp") setStatus("using relay...");
+            if (info.phase === "resolving-wisp") setStatus("checking relay...");
             if (info.phase === "connecting") setStatus("starting Scramjet...");
             if (info.phase === "retrying") setStatus("retrying...");
             if (info.phase === "loading") setStatus("loading...");
@@ -119,6 +203,8 @@
 
     retry.addEventListener("click", () => {
       if (runtime) runtime.destroy();
+      rejectedRelays.clear();
+      relayPromise = null;
       runtime = null;
       load();
     });
