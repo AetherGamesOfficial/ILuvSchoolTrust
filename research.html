@@ -979,15 +979,18 @@ if (document.readyState === "loading") {
 </script>
 <script>
 (() => {
-    const store = window.localStorage;
     const bgMap = {
         default: '#121212 url("aether background.png") center / cover fixed no-repeat',
         night: 'linear-gradient(135deg, #050505, #122033 58%, #12051f) fixed',
         ocean: 'linear-gradient(135deg, #001219, #005f73, #0a9396) fixed',
         none: '#121212'
     };
-    const custom = (store.getItem('aether.settings.customBg') || '').trim();
-    const mode = store.getItem('aether.settings.bg') || 'default';
+    let custom = "";
+    let mode = "default";
+    try {
+        custom = (window.localStorage.getItem('aether.settings.customBg') || '').trim();
+        mode = window.localStorage.getItem('aether.settings.bg') || 'default';
+    } catch {}
     const bg = custom ? `#121212 url("${custom.replace(/"/g, '%22')}") center / cover fixed no-repeat` : (bgMap[mode] || bgMap.default);
     document.documentElement.style.background = bg;
     document.body.style.background = bg;

@@ -31,7 +31,7 @@
   </div>
   <iframe id="frame" allow="autoplay; fullscreen; clipboard-read; clipboard-write; encrypted-media; picture-in-picture; gamepad"></iframe>
   <script type="module">
-    import { r as prepare, R as Runtime, W as WispResolver, d as decodeTarget } from "https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main/assets/resolver-C09Pc7JC.js";
+    import { r as prepare, R as Runtime, d as decodeTarget } from "https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main/assets/resolver-C09Pc7JC.js";
 
     const params = new URLSearchParams(location.search);
     const wisp = window.__AETHER_STATIC_WISP || params.get("wisp") || "wss://wisp.mercurywork.shop/";
@@ -43,7 +43,6 @@
     const errorText = document.getElementById("errorText");
     const retry = document.getElementById("retry");
     let runId = 0;
-    let resolver = null;
     let runtime = null;
 
     function post(status, detail) {
@@ -66,17 +65,9 @@
     async function getRuntime() {
       if (runtime) return runtime;
       await prepare().catch(() => {});
-      resolver = new WispResolver({
-        readOverride: () => wisp,
-        hasBackend: false,
-        listUrls: [],
-        bundledList: [wisp],
-        waveSize: 1,
-        probeTimeoutMs: 8000
-      });
-      runtime = new Runtime(async (url) => (await resolver.resolve(url)).url, {
-        onWispFailure: (url) => resolver.reject(url),
-        onWispSuccess: (url) => resolver.confirm(url)
+      runtime = new Runtime(async () => wisp, {
+        onWispFailure: () => {},
+        onWispSuccess: () => {}
       });
       return runtime;
     }
@@ -103,7 +94,7 @@
           isStale: () => token !== runId,
           onLocationChange: (url) => post("navigate", url),
           onStatus: (info) => {
-            if (info.phase === "resolving-wisp") setStatus("checking relay...");
+            if (info.phase === "resolving-wisp") setStatus("using relay...");
             if (info.phase === "connecting") setStatus("starting Scramjet...");
             if (info.phase === "retrying") setStatus("retrying...");
             if (info.phase === "loading") setStatus("loading...");
@@ -127,9 +118,7 @@
     }
 
     retry.addEventListener("click", () => {
-      if (resolver) resolver.invalidate();
       if (runtime) runtime.destroy();
-      resolver = null;
       runtime = null;
       load();
     });
