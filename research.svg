@@ -537,6 +537,38 @@
             background: rgba(0, 0, 0, 0.35) !important;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
+            z-index: 90;
+        }
+
+        .nav-toggle {
+            position: absolute;
+            top: 122px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 91;
+            width: 56px;
+            height: 28px;
+            border: 4px solid #ffffff;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        body.nav-hidden .appleseed {
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -120%);
+        }
+
+        body.nav-hidden .nav-toggle {
+            top: 16px;
+            border-top: 4px solid #ffffff;
+            border-radius: 12px;
         }
 
         .Medeviscool,
@@ -590,6 +622,8 @@
             &lt;/svg&gt;
         &lt;/a&gt;
     &lt;/nav&gt;
+
+    &lt;button class=&quot;nav-toggle&quot; id=&quot;nav-toggle&quot; type=&quot;button&quot; aria-label=&quot;Hide navigation&quot;&gt;^&lt;/button&gt;
 
     &lt;div class=&quot;main-workspace&quot;&gt;
 
@@ -711,9 +745,23 @@ function initAetherResearch() {
     const newTabBtn = document.getElementById(&quot;new-tab-btn&quot;);
     const viewportsContainer = document.getElementById(&quot;viewports-container&quot;);
     const homeNav = document.getElementById(&quot;home-nav&quot;);
+    const navToggle = document.getElementById(&quot;nav-toggle&quot;);
     let tabs = [];
     let activeTabId = null;
     let loadToken = 0;
+
+    function syncNavToggle() {
+        const hidden = document.body.classList.contains(&quot;nav-hidden&quot;);
+        navToggle.textContent = hidden ? &quot;v&quot; : &quot;^&quot;;
+        navToggle.setAttribute(&quot;aria-label&quot;, hidden ? &quot;Show navigation&quot; : &quot;Hide navigation&quot;);
+    }
+
+    navToggle.addEventListener(&quot;click&quot;, () =&gt; {
+        document.body.classList.toggle(&quot;nav-hidden&quot;);
+        syncNavToggle();
+    });
+
+    syncNavToggle();
 
     function formatUrl(input) {
         let url = input.trim();
@@ -725,7 +773,7 @@ function initAetherResearch() {
             return &quot;https://&quot; + url;
         }
 
-        return &quot;https://www.google.com/search?igu=1&amp;q=&quot; + encodeURIComponent(url);
+        return &quot;https://www.bing.com/search?q=&quot; + encodeURIComponent(url);
     }
 
     function assertValidUrl(url) {
@@ -748,7 +796,7 @@ function initAetherResearch() {
         const hasPage = !!tab?.hasLoadedUrl;
 
         landingUi.style.display = hasPage ? &quot;none&quot; : &quot;flex&quot;;
-        homeNav.style.display = hasPage ? &quot;none&quot; : &quot;flex&quot;;
+        homeNav.style.display = &quot;flex&quot;;
         address.value = hasPage ? (tab.rawInput || tab.currentUrl) : &quot;&quot;;
 
         for (const t of tabs) {
