@@ -663,6 +663,7 @@ function initAetherResearch() {
 
     const toolTargetKey = "aether-tool-target";
     const staticCdnBase = "https://cdn.jsdelivr.net/gh/AetherGamesOfficial/Aetherhtmlstatic@main/";
+    const arcticEmbedBase = "https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main/embed.svg";
     const arcticWisps = [
         "wss://wisp.mercurywork.shop/",
         "wss://arctic.lat/wisp/",
@@ -689,7 +690,7 @@ function initAetherResearch() {
         const params = new URLSearchParams({ backend: "scramjet2", palette: "gnmath" });
         const wisp = arcticWisps[routeIndex];
         if (wisp) params.set("wisp", wisp);
-        return getStaticAssetUrl("static-scramjet.svg") + "?" + params.toString() + "#" + encodeArcticTarget(target);
+        return arcticEmbedBase + "?" + params.toString() + "#" + encodeArcticTarget(target);
     }
 
     const form = document.getElementById("uv-form");
