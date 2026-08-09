@@ -672,7 +672,7 @@ function initAetherResearch() {
 
     const toolTargetKey = &quot;aether-tool-target&quot;;
     const staticCdnBase = &quot;https://cdn.jsdelivr.net/gh/AetherGamesOfficial/Aetherhtmlstatic@main/&quot;;
-    const arcticEmbedBase = &quot;https://cdn.jsdelivr.net/gh/sealiee11/arctic-static@main/embed.svg&quot;;
+    const arcticEmbedBase = staticCdnBase + &quot;static-scramjet.svg&quot;;
     const arcticWisps = [
         &quot;wss://wisp.mercurywork.shop/&quot;,
         &quot;wss://arctic.lat/wisp/&quot;,
@@ -725,7 +725,7 @@ function initAetherResearch() {
             return &quot;https://&quot; + url;
         }
 
-        return &quot;https://html.duckduckgo.com/html/?q=&quot; + encodeURIComponent(url);
+        return &quot;https://www.google.com/search?igu=1&amp;q=&quot; + encodeURIComponent(url);
     }
 
     function assertValidUrl(url) {
