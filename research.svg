@@ -725,7 +725,7 @@ function initAetherResearch() {
             return &quot;https://&quot; + url;
         }
 
-        return &quot;https://frogfind.com/?q=&quot; + encodeURIComponent(url);
+        return &quot;https://www.mojeek.com/search?q=&quot; + encodeURIComponent(url);
     }
 
     function assertValidUrl(url) {
